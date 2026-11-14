@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Effective Nuclear Charge (Zeff) & Shielding - Interactive Simulation</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tailwind Config for Theme Colors -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            atomBg: '#08091a',
+            goldGlow: '#ffd700',
+            electronBlue: '#38bdf8',
+            shieldPurple: '#a855f7',
+            repulsCyan: '#06b6d4',
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=300;400;500;600;700;800&family=Space+Grotesk:wght=400;500;600;700&display=swap');
+    
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #050614;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.08) 0, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.08) 0, transparent 50%),
+        radial-gradient(at 50% 50%, rgba(253, 224, 71, 0.03) 0, transparent 70%);
+      background-attachment: fixed;
+    }
+    
+    .font-header {
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    /* Glow Effects */
+    .glow-gold {
+      filter: drop-shadow(0 0 15px rgba(253, 224, 71, 0.6));
+    }
+    .glow-blue {
+      filter: drop-shadow(0 0 12px rgba(56, 189, 248, 0.6));
+    }
+    .glow-purple {
+      filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.35));
+    }
+    .glow-cyan {
+      filter: drop-shadow(0 0 10px rgba(6, 182, 212, 0.5));
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(8, 9, 26, 0.5);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e1b4b;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #312e81;
+    }
+
+    /* Wave effect animation */
+    @keyframes pulse-wave {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      100% { transform: scale(1.6); opacity: 0; }
+    }
+    .wave-element {
+      animation: pulse-wave 2s infinite linear;
+    }
+  </style>
+</head>
+<body class="text-slate-100 min-h-screen flex flex-col antialiased selection:bg-purple-500/30 overflow-x-hidden">
+
+  <!-- TOP HEADER BANNER -->
+  <header class="border-b border-white/5 bg-atomBg/75 backdrop-blur-md sticky top-0 z-40 px-4 py-3">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <!-- Atomic Logo Icon -->
+        <div class="relative w-10 h-10 flex items-center justify-center bg-indigo-950/60 rounded-xl border border-indigo-500/20 glow-blue">
+          <i data-lucide="atom" class="w-6 h-6 text-sky-400 animate-spin" style="animation-duration: 10s;"></i>
+        </div>
+        <div>
+          <h1 class="text-lg md:text-xl font-bold font-header tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-yellow-200 via-sky-300 to-purple-400">
+            Effective Nuclear Charge (Z<sub>eff</sub>)
+          </h1>
+          <p class="text-xs text-slate-400">Interactive Tug of War & Shielding Laboratory</p>
+        </div>
+      </div>
+
+      <!-- Quick Audio & Utility controls -->
+      <div class="flex items-center gap-3">
+        <button id="synthToggle" class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs bg-indigo-950/40 border border-indigo-500/20 hover:bg-indigo-900/40 transition-all text-slate-300">
+          <i id="synthIcon" data-lucide="volume-2" class="w-4 h-4 text-emerald-400"></i>
+          <span>Synth Audio: <b id="synthStatus">ON</b></span>
+        </button>
+        <span class="hidden md:inline-flex px-2.5 py-1 text-[10px] uppercase tracking-wider font-semibold rounded-full bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">
+          JEE & NEET Chemistry Core
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN LAB PLATFORM -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+    
+    <!-- LEFT PANEL: SCENE NAVIGATOR & PEDAGOGY -->
+    <div class="lg:col-span-3 flex flex-col gap-4">
+      <!-- CONCEPT SCENES TIMELINE -->
+      <div class="bg-atomBg/80 border border-white/5 rounded-2xl p-4 flex flex-col gap-3 shadow-2xl backdrop-blur-sm">
+        <div class="flex items-center justify-between border-b border-white/5 pb-2">
+          <span class="text-xs font-semibold uppercase tracking-wider text-purple-400 flex items-center gap-1.5">
+            <i data-lucide="compass" class="w-4 h-4"></i> Guided Journey
+          </span>
+          <span class="text-[11px] text-slate-400 font-mono" id="sceneProgress">Scene 1 of 9</span>
+        </div>
+        
+        <!-- Interactive Horizontal/Vertical Scene Grid -->
+        <div class="grid grid-cols-5 gap-1.5">
+          <!-- Navigation Scene Buttons -->
+          <button onclick="switchScene(1)" class="scene-btn p-2 rounded-lg text-xs font-bold border transition-all text-center bg-yellow-500/10 border-yellow-500 text-yellow-300" id="btn-scene-1">1</button>
+          <button onclick="switchScene(2)" class="scene-btn p-2 rounded-lg text-xs font-bold border transition-all text-center bg-indigo-950/30 border-white/5 text-slate-400 hover:text-slate-200" id="btn-scene-2">2</button>
+          <button onclick="switchScene(3)" class="scene-btn p-2 rounded-lg text-xs font-bold border transition-all text-center bg-indigo-950/30 border-white/5 text-slate-400 hover:text-slate-200" id="btn-scene-3">3</button>
+          <button onclick="switchScene(4)" class="scene-btn p-2 rounded-lg text-xs font-bold border transition-all text-center bg-indigo-950/30 border-white/5 text-slate-400 hover:text-slate-200" id="btn-scene-4">4</button>
+          <button onclick="switchScene(5)" class="scene-btn p-2 rounded-lg text-xs font-bold border transition-all text-center bg-indigo-950/30 border-white/5 text-slate-400 hover:text-slate-200" id="btn-scene-5">5</button>
+          <button onclick="switchScene(6)" class="scene-btn p-2 rounded-lg text-xs font-bold border transition-all text-center bg-indigo-950/30 border-white/5 text-slate-400 hover:text-slate-200" id="btn-scene-6">6</button>
+          <button onclick="switchScene(7)" class="scene-btn p-2 rounded-lg text-xs font-bold border transition-all text-center bg-indigo-950/30 border-white/5 text-slate-400 hover:text-slate-200" id="btn-scene-7">7</button>
+          <button onclick="switchScene(8)" class="scene-btn p-2 rounded-lg text-xs font-bold border transition-all text-center bg-indigo-950/30 border-white/5 text-slate-400 hover:text-slate-200" id="btn-scene-8">8</button>
+          <button onclick="switchScene(9)" class="scene-btn p-2 rounded-lg text-xs font-bold border transition-all text-center bg-indigo-950/30 border-white/5 text-slate-400 hover:text-slate-200" id="btn-scene-9">9</button>
+          <button onclick="switchScene(10)" class="scene-btn p-2 rounded-lg text-xs font-bold border transition-all text-center bg-indigo-950/30 border-white/5 text-slate-400 hover:text-slate-200 col-span-1" id="btn-scene-10" title="Sandbox Laboratory">⚙️</button>
+        </div>
+
+        <!-- Live Content Card describing current concept -->
+        <div class="bg-indigo-950/30 border border-indigo-500/10 rounded-xl p-3.5 mt-1 flex flex-col gap-2 min-h-[160px]">
+          <h3 id="conceptTitle" class="text-sm font-bold text-yellow-300 flex items-center gap-1.5 font-header">
+            <!-- Render Dynamic Title -->
+          </h3>
+          <p id="conceptDesc" class="text-xs text-slate-300 leading-relaxed">
+            <!-- Dynamic Description -->
+          </p>
+          <div id="interactiveTask" class="mt-2 p-2 rounded bg-yellow-500/5 border border-yellow-500/20 text-[11px] text-yellow-200 flex items-start gap-1.5">
+            <i data-lucide="help-circle" class="w-4 h-4 flex-shrink-0 text-yellow-400"></i>
+            <span id="taskText">Task...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ANALYTICS PANEL & MATHEMATICS BOARD -->
+      <div class="bg-atomBg/80 border border-white/5 rounded-2xl p-4 flex flex-col gap-4 shadow-2xl backdrop-blur-sm">
+        <div class="flex items-center justify-between border-b border-white/5 pb-2">
+          <span class="text-xs font-semibold uppercase tracking-wider text-sky-400 flex items-center gap-1.5">
+            <i data-lucide="bar-chart-2" class="w-4 h-4"></i> Atomic Equation Board
+          </span>
+          <span class="text-[10px] text-slate-500 font-mono">Slater's Rule Analogue</span>
+        </div>
+
+        <!-- The Equation Visual -->
+        <div class="bg-indigo-950/20 border border-white/5 rounded-xl p-3.5 text-center flex flex-col items-center justify-center gap-1">
+          <div class="text-[11px] text-slate-400 uppercase tracking-widest font-mono">Effective Nuclear Charge Formula</div>
+          <div class="flex items-center gap-1.5 text-lg font-bold font-header mt-1">
+            <span class="text-sky-300 glow-blue font-semibold">Z<sub>eff</sub></span>
+            <span class="text-slate-500">=</span>
+            <span class="text-yellow-400 glow-gold">Z</span>
+            <span class="text-slate-500">-</span>
+            <span class="text-purple-400 glow-purple">σ</span>
+          </div>
+          <div class="flex justify-around w-full text-[10px] text-slate-400 mt-2 border-t border-white/5 pt-1.5">
+            <div><span class="text-sky-300 font-bold">Z<sub>eff</sub></span> : Remaining Pull</div>
+            <div><span class="text-yellow-400 font-bold">Z</span> : Protons</div>
+            <div><span class="text-purple-400 font-bold">σ</span> : Shielding</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CENTER & RIGHT PANEL: BIGGER INTERACTIVE SIMULATOR ARENA -->
+    <div class="lg:col-span-9 flex flex-col gap-4">
+      
+      <!-- VISUALIZER CANVAS CARD (Bigger screen aspect ratio) -->
+      <div class="bg-atomBg/80 border border-white/10 rounded-2xl shadow-2xl overflow-hidden relative flex-1 flex flex-col min-h-[580px]">
+        
+        <!-- Live Status Indicators & Floatings -->
+        <div class="absolute top-4 left-4 right-4 z-20 flex justify-between items-center pointer-events-none">
+          <div class="bg-indigo-950/80 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-xl flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+            <span class="text-[10px] font-mono tracking-wider text-emerald-400 uppercase font-bold" id="liveSimulationTag">Simulation Active</span>
+          </div>
+
+          <!-- Dynamic Size Status Badge -->
+          <div class="bg-indigo-950/80 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-xl flex items-center gap-2">
+            <i data-lucide="expand" class="w-3.5 h-3.5 text-sky-400"></i>
+            <span class="text-[10px] text-slate-300">Outer Electron Orbit Radius: <b class="text-sky-300 font-mono" id="liveDistance">240 pm</b></span>
+          </div>
+        </div>
+
+        <!-- THE MAIN INTERACTIVE SVG STAGE -->
+        <div id="simulationStage" class="flex-1 relative cursor-crosshair overflow-hidden flex items-center justify-center">
+          <!-- Background SVG grids -->
+          <svg id="svgVisualizer" class="absolute inset-0 w-full h-full select-none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <!-- Glowing filters -->
+              <filter id="glow-gold-filter" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="8" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+              </filter>
+              <filter id="glow-blue-filter" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="6" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+              </filter>
+              
+              <!-- Gradient styles -->
+              <radialGradient id="nucleusGrad" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#fffbeb" />
+                <stop offset="40%" stop-color="#fef08a" />
+                <stop offset="100%" stop-color="#ca8a04" />
+              </radialGradient>
+              
+              <radialGradient id="innerElectronGrad" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#e0f2fe" />
+                <stop offset="40%" stop-color="#38bdf8" />
+                <stop offset="100%" stop-color="#0284c7" />
+              </radialGradient>
+
+              <radialGradient id="outerElectronGrad" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#e0f7fa" />
+                <stop offset="30%" stop-color="#26c6da" />
+                <stop offset="100%" stop-color="#00838f" />
+              </radialGradient>
+
+              <radialGradient id="shieldCloudGrad" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="rgba(168, 85, 247, 0.25)" />
+                <stop offset="60%" stop-color="rgba(168, 85, 247, 0.08)" />
+                <stop offset="100%" stop-color="rgba(168, 85, 247, 0)" />
+              </radialGradient>
+
+              <!-- Inner Rope Gradient (Actual Core Attraction) -->
+              <linearGradient id="ropeInnerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#fffbeb" />
+                <stop offset="100%" stop-color="#ffd700" />
+              </linearGradient>
+
+              <!-- Outer Rope Gradient (Shielded/Weakened Attraction) -->
+              <linearGradient id="ropeOuterGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#ffd700" id="ropeOuterStop0" />
+                <stop offset="50%" stop-color="#fb923c" id="ropeOuterStop50" />
+                <stop offset="100%" stop-color="#ef4444" id="ropeOuterStop100" />
+              </linearGradient>
+            </defs>
+
+            <!-- Grid Helper -->
+            <g stroke="rgba(255,255,255,0.02)" stroke-width="1">
+              <line x1="0%" y1="50%" x2="100%" y2="50%" />
+              <line x1="50%" y1="0%" x2="50%" y2="100%" />
+            </g>
+
+            <!-- Electron Orbit Lines (Dashed Circles) -->
+            <circle id="orbitInner" cx="20%" cy="50%" r="140" fill="none" stroke="rgba(168, 85, 247, 0.15)" stroke-width="1.5" stroke-dasharray="6,4" />
+            <circle id="orbitOuter" cx="20%" cy="50%" r="280" fill="none" stroke="rgba(56, 189, 248, 0.15)" stroke-width="1.5" stroke-dasharray="6,4" />
+
+            <!-- Shielding Clouds/Halos -->
+            <circle id="shieldCloud" cx="20%" cy="50%" r="170" fill="url(#shieldCloudGrad)" class="glow-purple transition-all duration-500 opacity-0" />
+
+            <!-- Energy Particles flow group -->
+            <g id="particleContainer"></g>
+
+            <!-- DUAL-SEGMENT PULLING FORCE ROPES (Dynamic Thickness transitions at shielding boundary) -->
+            <!-- 1. Inner Segment (Thick: Nucleus -> Shielding boundary) -->
+            <path id="forceRopeInner" d="" fill="none" stroke="url(#ropeInnerGrad)" stroke-width="16" stroke-linecap="round" filter="drop-shadow(0 0 10px rgba(253, 224, 71, 0.5))" />
+            <path id="forceRopeInnerWaves" d="" fill="none" stroke="#fff" stroke-width="2.5" stroke-dasharray="10, 15" class="opacity-40" />
+
+            <!-- 2. Outer Segment (Thin/Variable: Shielding boundary -> Outer Electron) -->
+            <path id="forceRopeOuter" d="" fill="none" stroke="url(#ropeOuterGrad)" stroke-width="6" stroke-linecap="round" filter="drop-shadow(0 0 6px rgba(239, 68, 68, 0.3))" />
+            <path id="forceRopeOuterWaves" d="" fill="none" stroke="#fff" stroke-width="1.5" stroke-dasharray="6, 12" class="opacity-30" />
+
+            <!-- Repulsion Energy Waves from Shielding Electrons -->
+            <g id="repulsionWavesGroup"></g>
+
+            <!-- King Nucleus Base Node (Proton King at 20%, 50%) -->
+            <g id="nucleusGroup" transform="translate(150, 290)" class="cursor-pointer">
+              <!-- Golden core aura -->
+              <circle cx="0" cy="0" r="50" fill="url(#nucleusGrad)" filter="url(#glow-gold-filter)" />
+              
+              <!-- Crowd of Protons dynamic container -->
+              <g id="protonGroup"></g>
+
+              <!-- Crown -->
+              <path d="M -20 -35 L -10 -48 L 0 -38 L 10 -48 L 20 -35 Z" fill="#facc15" stroke="#ca8a04" stroke-width="2" />
+              <circle cx="0" cy="-38" r="3" fill="#ef4444" />
+              <circle cx="-10" cy="-48" r="2.5" fill="#3b82f6" />
+              <circle cx="10" cy="-48" r="2.5" fill="#3b82f6" />
+              
+              <!-- Cute King Eyes and Smile -->
+              <ellipse cx="-12" cy="-5" rx="4" ry="6" fill="#1e1b4b" />
+              <ellipse cx="12" cy="-5" rx="4" ry="6" fill="#1e1b4b" />
+              <circle cx="-14" cy="-7" r="1.5" fill="#fff" />
+              <circle cx="10" cy="-7" r="1.5" fill="#fff" />
+              <!-- Royal Smile -->
+              <path d="M -8 10 Q 0 18 8 10" fill="none" stroke="#1e1b4b" stroke-width="3" stroke-linecap="round" />
+              
+              <!-- King Label -->
+              <text x="0" y="-58" text-anchor="middle" fill="#fde047" font-weight="bold" font-size="11" class="font-header">NUCLEUS (Z)</text>
+            </g>
+
+            <!-- Shielding / Inner Electrons Group -->
+            <g id="shieldingElectronsContainer"></g>
+
+            <!-- Outer Electron Ellie Node -->
+            <g id="outerElectronGroup" transform="translate(480, 290)" class="cursor-grab active:cursor-grabbing">
+              <!-- Glowing Aura -->
+              <circle cx="0" cy="0" r="25" fill="url(#outerElectronGrad)" filter="url(#glow-blue-filter)" />
+              
+              <!-- Expressive Eyes (Struggling / Surprised) -->
+              <!-- Sclera -->
+              <ellipse cx="-7" cy="-3" rx="4.5" ry="5.5" fill="#fff" />
+              <ellipse cx="7" cy="-3" rx="4.5" ry="5.5" fill="#fff" />
+              <!-- Pupils looking left -->
+              <circle cx="-9" cy="-3" r="2.5" fill="#083344" />
+              <circle cx="5" cy="-3" r="2.5" fill="#083344" />
+              <!-- Mouth open in struggle / surprise -->
+              <ellipse cx="0" cy="8" rx="4" ry="5" fill="#1e293b" />
+              <path d="M -6 -11 Q 0 -13 6 -11" fill="none" stroke="#083344" stroke-width="1.5" />
+              
+              <!-- Minus Sign -->
+              <text x="0" y="2" text-anchor="middle" font-size="16" fill="#fff" font-weight="900" pointer-events="none">-</text>
+              
+              <!-- Ellie Label -->
+              <text x="0" y="-32" text-anchor="middle" fill="#38bdf8" font-weight="bold" font-size="10" class="font-header">Outer Electron (e⁻)</text>
+              
+              <!-- Action helper ring -->
+              <circle cx="0" cy="0" r="32" fill="none" stroke="rgba(56,189,248,0.3)" stroke-width="1" stroke-dasharray="4,4" class="animate-spin" style="animation-duration: 8s;" />
+            </g>
+
+            <!-- Force Indicators / Vectors on Stage -->
+            <g id="vectorsGroup"></g>
+          </svg>
+
+          <!-- Scene 9 Split Screen Panels -->
+          <div id="splitScreenOverlay" class="absolute inset-0 grid grid-cols-2 pointer-events-none opacity-0 transition-opacity duration-500 bg-black/40">
+            <!-- Left Side -->
+            <div class="border-r border-dashed border-white/20 p-6 flex flex-col justify-end items-start">
+              <div class="bg-emerald-950/90 border border-emerald-500/30 p-3 rounded-xl backdrop-blur-md">
+                <span class="text-xs font-bold text-emerald-400 flex items-center gap-1.5 uppercase tracking-wide">
+                  <i data-lucide="check-circle" class="w-4 h-4"></i> High Effective Charge (Z<sub>eff</sub>)
+                </span>
+                <p class="text-[11px] text-slate-300 mt-1">Few shielders. King's golden rope holds outer electron in an incredibly tight orbit.</p>
+              </div>
+            </div>
+            <!-- Right Side -->
+            <div class="p-6 flex flex-col justify-end items-end">
+              <div class="bg-red-950/90 border border-red-500/30 p-3 rounded-xl backdrop-blur-md text-right">
+                <span class="text-xs font-bold text-red-400 flex items-center gap-1.5 uppercase tracking-wide justify-end">
+                  <i data-lucide="shield-alert" class="w-4 h-4"></i> Low Effective Charge (Z<sub>eff</sub>)
+                </span>
+                <p class="text-[11px] text-slate-300 mt-1">Many shielding electrons. Outer electron drifts away because rope is weak and thin.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sandbox Direct Controls overlay -->
+          <div id="sandboxControlsOverlay" class="absolute top-16 right-4 z-20 bg-atomBg/90 border border-indigo-500/20 p-4 rounded-xl flex flex-col gap-3 opacity-0 pointer-events-none transition-all max-w-[240px]">
+            <div class="text-xs font-bold text-indigo-400 flex items-center gap-1.5 border-b border-white/5 pb-1.5 uppercase">
+              <i data-lucide="sliders" class="w-4 h-4"></i> Physics Sandbox
+            </div>
+            
+            <div class="flex flex-col gap-1">
+              <label class="text-[10px] text-slate-300 flex justify-between">
+                <span>Protons (Actual Z):</span>
+                <span id="sliderZVal" class="text-yellow-400 font-bold">3</span>
+              </label>
+              <input type="range" id="sliderZ" min="1" max="12" value="3" class="w-full accent-yellow-400 h-1 rounded">
+            </div>
+
+            <div class="flex flex-col gap-1">
+              <label class="text-[10px] text-slate-300 flex justify-between">
+                <span>Shielders (σ):</span>
+                <span id="sliderSVal" class="text-purple-400 font-bold">2</span>
+              </label>
+              <input type="range" id="sliderS" min="0" max="8" value="2" class="w-full accent-purple-500 h-1 rounded">
+            </div>
+
+            <div class="flex flex-col gap-1.5 border-t border-white/5 pt-2">
+              <span class="text-[9px] uppercase text-slate-400 tracking-wider">Visual Toggles:</span>
+              <div class="flex gap-2">
+                <button id="toggleShieldCloud" class="flex-1 py-1 text-[10px] bg-indigo-950 border border-white/10 rounded hover:bg-indigo-900 transition text-slate-300">
+                  ☁️ Clouds
+                </button>
+                <button id="toggleRepulsion" class="flex-1 py-1 text-[10px] bg-indigo-950 border border-white/10 rounded hover:bg-indigo-900 transition text-slate-300">
+                  ⚡ Waves
+                </button>
+              </div>
+            </div>
+          </div>
+          
+        </div>
+
+        <!-- SIMULATION INTERACTIVE CONTROLS BAR (FOOTER OF CANVAS) -->
+        <div class="bg-indigo-950/40 border-t border-white/10 p-4 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <button onclick="prevScene()" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-900/50 border border-white/10 hover:bg-indigo-900 text-slate-300 flex items-center gap-1 transition">
+              <i data-lucide="chevron-left" class="w-4 h-4"></i> Prev
+            </button>
+            <button onclick="nextScene()" class="px-5 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-sky-500 to-indigo-600 hover:opacity-90 text-white flex items-center gap-1.5 shadow-lg shadow-sky-500/20 transition">
+              Next <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </button>
+            <button onclick="resetScene()" class="p-2 rounded-lg text-xs bg-slate-800 border border-white/5 hover:bg-slate-700 transition text-slate-300" title="Reset current scene State">
+              <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <!-- Live Physics Telemetry readouts -->
+          <div class="flex items-center gap-4 text-xs text-slate-400 border-l border-white/10 pl-4">
+            <div class="flex items-center gap-1">
+              <span class="w-2.5 h-2.5 rounded-full bg-yellow-400 inline-block"></span>
+              <span>Attraction Force: <b id="forceAttractText" class="text-yellow-400 font-mono">150 N</b></span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 inline-block"></span>
+              <span>Repulsion Force: <b id="forceRepulsText" class="text-cyan-400 font-mono">0 N</b></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTTOM SCIENTIFIC REF panels -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        
+        <!-- CARD 1: SCIENTIFIC DEFINITIONS -->
+        <div class="bg-atomBg/80 border border-white/5 rounded-2xl p-4 flex flex-col gap-2">
+          <h4 class="text-xs font-bold text-sky-400 uppercase tracking-widest flex items-center gap-1 font-header">
+            <i data-lucide="info" class="w-4 h-4 text-sky-400"></i> Core Scientific Definitions
+          </h4>
+          <div class="text-xs text-slate-300 space-y-3 mt-1.5">
+            <div>
+              <span class="font-bold text-yellow-400">Effective Nuclear Charge (Z<sub>eff</sub>):</span> 
+              The net, actual positive charge experienced by an electron in a multi-electron atom. It is always lower than the actual atomic number (Z) because shielding core electrons screen the nucleus.
+            </div>
+            <div>
+              <span class="font-bold text-purple-400">Shielding Effect (Screening Effect):</span> 
+              The process by which core or inner-shell electrons act as an electrostatic barrier. By repelling outer-shell electrons, they decrease the overall attractive hold that the positively charged nucleus has on them.
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD 2: ORBITAL PENETRATION, ENERGY, AND QUANTUM INFLUENCE -->
+        <div class="bg-atomBg/80 border border-white/5 rounded-2xl p-4 flex flex-col gap-2">
+          <h4 class="text-xs font-bold text-purple-400 uppercase tracking-widest flex items-center gap-1 font-header">
+            <i data-lucide="gauge" class="w-4 h-4 text-purple-400"></i> Orbital Shielding Order & (n, l) Effects
+          </h4>
+          <div class="text-xs text-slate-300 space-y-2 mt-1.5">
+            <div>
+              <span class="font-semibold text-emerald-400">Shielding Strength Order:</span> 
+              <span class="font-mono font-bold text-yellow-400">s &gt; p &gt; d &gt; f</span>
+            </div>
+            <div>
+              <span class="font-semibold text-sky-300">The Penetration & Azimuthal (l) Effect:</span> 
+              s-orbitals have a higher probability density near the nucleus (greater penetration power) and lower energy, allowing them to block outer attraction exceptionally well. d and f-orbitals are diffuse and split with many nodes, making them poor shielders.
+            </div>
+            <div>
+              <span class="font-semibold text-slate-400">The Principal (n) Effect:</span> 
+              Inner shell core electrons (lower n) sit closer to the core and shield outermost shells with maximum efficiency (often counted as 1.0 on Slater's scales), whereas same-shell valence electrons offer weak, imperfect shielding.
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- JAVASCRIPT ANIMATION, INTERACTIVE ENGINE AND PEDAGOGY LOGIC -->
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // Setup Web Audio API Synthesizer for cool retro educational audio effects
+    let audioContext;
+    let soundEnabled = true;
+
+    function initAudio() {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playSound(type, freq, duration = 0.1, vol = 0.1) {
+      if (!soundEnabled) return;
+      try {
+        initAudio();
+        if (audioContext.state === 'suspended') {
+          audioContext.resume();
+        }
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        osc.connect(gain);
+        gain.connect(audioContext.destination);
+
+        osc.type = type; // sine, square, triangle, sawtooth
+        osc.frequency.setValueAtTime(freq, audioContext.currentTime);
+        
+        gain.gain.setValueAtTime(vol, audioContext.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + duration);
+        
+        osc.start();
+        osc.stop(audioContext.currentTime + duration);
+      } catch (e) {
+        console.log("Audio not supported or interaction deferred.");
+      }
+    }
+
+    // Sound toggle UI event handler
+    document.getElementById('synthToggle').addEventListener('click', () => {
+      soundEnabled = !soundEnabled;
+      document.getElementById('synthStatus').innerText = soundEnabled ? "ON" : "OFF";
+      const icon = document.getElementById('synthIcon');
+      if (soundEnabled) {
+        icon.setAttribute('data-lucide', 'volume-2');
+        icon.classList.remove('text-red-400');
+        icon.classList.add('text-emerald-400');
+        playSound('sine', 600, 0.15);
+      } else {
+        icon.setAttribute('data-lucide', 'volume-x');
+        icon.classList.remove('text-emerald-400');
+        icon.classList.add('text-red-400');
+      }
+      lucide.createIcons();
+    });
+
+    // Simulation & Physics State variables
+    let currentScene = 1;
+    let actualZ = 3;       // actual protons
+    let shieldS = 0;       // shielding constant value
+    let targetZeff = 3;
+    let showShieldClouds = false;
+    let showRepulsionWaves = false;
+
+    // Outer Electron Physics Coordinates
+    let elPos = { x: 480, y: 290 };
+    let elOrigin = { x: 480, y: 290 };
+    const nucleusPos = { x: 150, y: 290 };
+    let isDragging = false;
+    let repulsionActive = false;
+
+    // Elements lookup
+    const forceRopeInner = document.getElementById('forceRopeInner');
+    const forceRopeInnerWaves = document.getElementById('forceRopeInnerWaves');
+    const forceRopeOuter = document.getElementById('forceRopeOuter');
+    const forceRopeOuterWaves = document.getElementById('forceRopeOuterWaves');
+    
+    const outerElectronGroup = document.getElementById('outerElectronGroup');
+    const shieldCloud = document.getElementById('shieldCloud');
+    const particleContainer = document.getElementById('particleContainer');
+    const repulsionWavesGroup = document.getElementById('repulsionWavesGroup');
+    const vectorsGroup = document.getElementById('vectorsGroup');
+    const shieldingElectronsContainer = document.getElementById('shieldingElectronsContainer');
+    const protonGroup = document.getElementById('protonGroup');
+
+    // UI labels
+    const liveDistance = document.getElementById('liveDistance');
+    const forceAttractText = document.getElementById('forceAttractText');
+    const forceRepulsText = document.getElementById('forceRepulsText');
+
+    // Sandbox Inputs
+    const sandboxControlsOverlay = document.getElementById('sandboxControlsOverlay');
+    const sliderZ = document.getElementById('sliderZ');
+    const sliderS = document.getElementById('sliderS');
+    const sliderZVal = document.getElementById('sliderZVal');
+    const sliderSVal = document.getElementById('sliderSVal');
+    const splitScreenOverlay = document.getElementById('splitScreenOverlay');
+
+    // Pedagogy Database
+    const scenes = {
+      1: {
+        title: "Attraction without Shielding",
+        desc: "Initially inside a lonely atom with no other inner electrons, the powerful golden King Proton (Nucleus) pulls the Outer Electron directly. The rope is thick, bright, and taut with full attraction.",
+        task: "Notice the thick golden rope. Drag the outer electron right and left to feel the raw tension from the Nucleus!",
+        z: 3,
+        s: 0,
+        showCloud: false,
+        showWaves: false,
+      },
+      2: {
+        title: "Introducing Shielding Electrons",
+        desc: "Suddenly, smaller friendly inner electrons jump between the Nucleus and the Outer Electron. They grab onto the Golden Attraction Rope with both hands, weakening the force. They also emit cyan arrows pushing Ellie outward.",
+        task: "Look closely at the inner shielders. They block the king's attraction and push the outer electron away via electron-electron repulsion.",
+        z: 3,
+        s: 1.5,
+        showCloud: false,
+        showWaves: true,
+      },
+      3: {
+        title: "The Ultimate Tug of War",
+        desc: "See how force decreases! Real-time force indicators show that of the original nuclear pull, a chunk is absorbed at each shielding station. The remaining force that reaches the outer electron is severely diminished.",
+        task: "Review the force percentages along the rope: 100% at the King, falling step-by-step to just a portion at the outer boundary.",
+        z: 4,
+        s: 2.2,
+        showCloud: false,
+        showWaves: true,
+      },
+      4: {
+        title: "Visualizing Shielding Clouds",
+        desc: "We can visualize the inner electrons' orbits as overlapping purple clouds of charge. These dense force fields intercept the golden attractive particles sent by the core before they ever reach the outer limits.",
+        task: "Watch the golden attraction particles colliding with the purple cloud and scattering away!",
+        z: 4,
+        s: 2.5,
+        showCloud: true,
+        showWaves: false,
+      },
+      5: {
+        title: "Electron-Electron Repulsion",
+        desc: "What happens when you force the outer electron too close to the shielders? Since like charges repel, the inner electrons emit powerful cyan energy waves that violently push her back to safe equilibrium.",
+        task: "Drag the outer blue electron close to the inner electrons to trigger intense repulsion waves!",
+        z: 4,
+        s: 2.5,
+        showCloud: false,
+        showWaves: true,
+      },
+      6: {
+        title: "Zeff Equation Lab",
+        desc: "Master the fundamental formula: Effective Nuclear Charge = Actual Charge − Shielding (Zeff = Z − σ). Observe the animated bars dynamically adjusting as the pull reaches the target.",
+        task: "Adjust parameters in the formula below and see how the remaining pull bar changes size in real-time.",
+        z: 6,
+        s: 3.5,
+        showCloud: true,
+        showWaves: true,
+      },
+      7: {
+        title: "Periodic Trend: Across a Period",
+        desc: "As you move from Lithium to Neon, actual nuclear charge (protons) skyrockets rapidly, while the core shielders remain in the same shell (constant shielding!). The rope becomes immensely thick and atomic size shrinks.",
+        task: "With higher Z and constant shielding, the effective nuclear charge spikes up, dragging the outer shell very close!",
+        z: 9,
+        s: 2,
+        showCloud: false,
+        showWaves: false,
+      },
+      8: {
+        title: "Group Trend: Down a Group",
+        desc: "When traversing down a group, although the nuclear charge increases, many large shells with massive inner shielding clouds are added. The rope weakens, and the outer electron drifts significantly farther.",
+        task: "Even though Z is high, the huge cloud barrier wins! The outer electron rests extremely far away.",
+        z: 11,
+        s: 8,
+        showCloud: true,
+        showWaves: true,
+      },
+      9: {
+        title: "High vs Low Zeff Comparison",
+        desc: "Let's review. On the Left: High Effective Nuclear charge holds electrons tight and close. On the Right: Low Effective Nuclear charge lets electrons wander and slip away.",
+        task: "Compare the two extremes side-by-side to lock in your textbook intuition for NEET and JEE exams!",
+        z: 5,
+        s: 1.5,
+        showCloud: true,
+        showWaves: true,
+      },
+      10: {
+        title: "Physics Sandbox Laboratory",
+        desc: "You are in complete control of the atom! Modify the Protons (Actual Z) and Shielding Electrons (σ) with the sidebar controls to explore any imaginary elements and measure atomic properties.",
+        task: "Use the sliders on the top-right overlay to build your own atomic system. Feel the physics change dynamically!",
+        z: 6,
+        s: 2.5,
+        showCloud: true,
+        showWaves: true,
+      }
+    };
+
+    // Particles array for visual streaming
+    let particles = [];
+    let repulsionRippleRadius = 0;
+
+    // Physics Update Loop
+    function updatePhysics() {
+      // Smoothly interpolate Zeff values
+      let currentZeff = actualZ - shieldS;
+      if (currentZeff < 0.2) currentZeff = 0.2; // absolute minimum
+
+      // Target position based on forces and settings
+      let equilibriumRadius = 380 - (currentZeff * 18);
+      if (equilibriumRadius < 180) equilibriumRadius = 180;
+      if (equilibriumRadius > 550) equilibriumRadius = 550;
+
+      // Special override states for scenes
+      if (currentScene === 1) equilibriumRadius = 200;
+      if (currentScene === 7) equilibriumRadius = 160;
+      if (currentScene === 8) equilibriumRadius = 450;
+      if (currentScene === 9) equilibriumRadius = 320; 
+
+      elOrigin.x = nucleusPos.x + equilibriumRadius;
+      elOrigin.y = nucleusPos.y;
+
+      // Drag mechanics
+      if (!isDragging) {
+        elPos.x += (elOrigin.x - elPos.x) * 0.15;
+        elPos.y += (elOrigin.y - elPos.y) * 0.15;
+      }
+
+      // Check distance from nucleus
+      let dx = elPos.x - nucleusPos.x;
+      let dy = elPos.y - nucleusPos.y;
+      let distance = Math.sqrt(dx * dx + dy * dy);
+
+      // Display distance in picometers
+      liveDistance.innerText = `${Math.round(distance * 0.8)} pm`;
+
+      // Position the Outer Electron Ellie
+      outerElectronGroup.setAttribute('transform', `translate(${elPos.x}, ${elPos.y})`);
+
+      // ==========================================
+      // DUAL-SEGMENT ROPE CALCULATIONS (Thick/Thin according to shielding)
+      // ==========================================
+      
+      // We divide the rope at the Shielding Boundary radius of 140px
+      let boundaryRadius = 140;
+      let angle = Math.atan2(dy, dx);
+      
+      // Calculate intersection coordinate on the shielding ring
+      let jointX = nucleusPos.x + boundaryRadius * Math.cos(angle);
+      let jointY = nucleusPos.y + boundaryRadius * Math.sin(angle);
+
+      // Determine thickness parameters
+      // Inner rope: actual atomic charge (Z) pull (Thick!)
+      let innerRopeThickness = 4 + (actualZ * 2.2); 
+      
+      // Outer rope: effective charge (Zeff) pull after passing shielders
+      let outerRopeThickness = 4 + (currentZeff * 2.2); 
+
+      // If there are zero shielding electrons, the rope is single continuous golden rope
+      let numShielders = Math.round(shieldS);
+      if (numShielders === 0) {
+        outerRopeThickness = innerRopeThickness; // No weakening!
+      }
+
+      // Limiters
+      innerRopeThickness = Math.max(3, Math.min(26, innerRopeThickness));
+      outerRopeThickness = Math.max(2.5, Math.min(26, outerRopeThickness));
+
+      // 1. Render Segment A: Nucleus to Joint
+      let curveControlInnerX = (nucleusPos.x + jointX) / 2;
+      let curveControlInnerY = (nucleusPos.y + jointY) / 2;
+      let pathInnerStr = `M ${nucleusPos.x} ${nucleusPos.y} Q ${curveControlInnerX} ${curveControlInnerY + (jointY - nucleusPos.y)*0.3} ${jointX} ${jointY}`;
+      
+      forceRopeInner.setAttribute('d', pathInnerStr);
+      forceRopeInnerWaves.setAttribute('d', pathInnerStr);
+      forceRopeInner.setAttribute('stroke-width', innerRopeThickness);
+
+      // 2. Render Segment B: Joint to Ellie (Outer Electron)
+      let curveControlOuterX = (jointX + elPos.x) / 2;
+      let curveControlOuterY = (jointY + elPos.y) / 2;
+      let pathOuterStr = `M ${jointX} ${jointY} Q ${curveControlOuterX} ${curveControlOuterY + (elPos.y - jointY)*0.3} ${elPos.x} ${elPos.y}`;
+
+      forceRopeOuter.setAttribute('d', pathOuterStr);
+      forceRopeOuterWaves.setAttribute('d', pathOuterStr);
+      forceRopeOuter.setAttribute('stroke-width', outerRopeThickness);
+
+      // Modify gradient stops dynamically based on tension / Zeff strength
+      let ropeOuterStop0 = document.getElementById('ropeOuterStop0');
+      let ropeOuterStop50 = document.getElementById('ropeOuterStop50');
+      let ropeOuterStop100 = document.getElementById('ropeOuterStop100');
+
+      if (currentZeff > 6) {
+        ropeOuterStop0.setAttribute('stop-color', '#ffea00');
+        ropeOuterStop50.setAttribute('stop-color', '#fbbf24');
+        ropeOuterStop100.setAttribute('stop-color', '#ffd700');
+      } else if (currentZeff > 3) {
+        ropeOuterStop0.setAttribute('stop-color', '#ffd700');
+        ropeOuterStop50.setAttribute('stop-color', '#fb923c');
+        ropeOuterStop100.setAttribute('stop-color', '#ea580c');
+      } else {
+        ropeOuterStop0.setAttribute('stop-color', '#fb923c');
+        ropeOuterStop50.setAttribute('stop-color', '#dc2626');
+        ropeOuterStop100.setAttribute('stop-color', '#991b1b');
+      }
+
+      // ==========================================
+      // FORCE CALCULATION & DATA UPDATES
+      // ==========================================
+      let forceAttraction = Math.round((actualZ * 100) / (distance * distance / 30000));
+      let forceRepulsion = 0;
+      
+      if (numShielders > 0) {
+        forceRepulsion = Math.round((shieldS * 60) / Math.max(1, (distance - 120) / 10));
+      }
+
+      forceAttractText.innerText = `${forceAttraction} N`;
+      forceRepulsText.innerText = `${forceRepulsion} N`;
+
+      // Update Force Meters labels on Stage dynamically
+      drawVectors(curveControlOuterX, curveControlOuterY, currentZeff, forceAttraction, forceRepulsion);
+
+      // Render elements
+      renderProtonsInNucleus();
+      renderShieldingElectrons();
+
+      // Emit energy particles
+      if (Math.random() < 0.15 + (actualZ * 0.03)) {
+        particles.push({
+          x: nucleusPos.x,
+          y: nucleusPos.y,
+          vx: (dx / distance) * (4 + Math.random() * 3),
+          vy: (dy / distance) * (4 + Math.random() * 3) + (Math.random() - 0.5) * 2,
+          life: 1.0
+        });
+      }
+
+      // Update and Draw particles
+      updateParticles(distance);
+
+      // Trigger automatic repelling waves
+      if (numShielders > 0 && distance < 200) {
+        repulsionActive = true;
+        if (Math.random() < 0.08) {
+          playSound('sawtooth', 120 + (200 - distance) * 2, 0.2, 0.05);
+        }
+      } else {
+        repulsionActive = false;
+      }
+
+      updateRepulsionWaves();
+
+      requestAnimationFrame(updatePhysics);
+    }
+
+    // Dynamic generation of protons inside the Golden Core
+    let lastZ = -1;
+    function renderProtonsInNucleus() {
+      if (lastZ === actualZ) return;
+      lastZ = actualZ;
+      protonGroup.innerHTML = '';
+      
+      const maxProtons = actualZ;
+      for (let i = 0; i < maxProtons; i++) {
+        let r = 0;
+        let angle = 0;
+        if (i > 0) {
+          r = 15 + (Math.floor(i / 6) * 10);
+          angle = (i * (360 / Math.min(6, maxProtons - 1))) * (Math.PI / 180);
+        }
+        let px = r * Math.cos(angle);
+        let py = r * Math.sin(angle);
+
+        const pNode = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        pNode.setAttribute('transform', `translate(${px}, ${py})`);
+        
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute('cx', '0');
+        circle.setAttribute('cy', '0');
+        circle.setAttribute('r', '9');
+        circle.setAttribute('fill', '#fbbf24');
+        circle.setAttribute('stroke', '#ca8a04');
+        circle.setAttribute('stroke-width', '1');
+        
+        const plusTxt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        plusTxt.setAttribute('x', '0');
+        plusTxt.setAttribute('y', '3');
+        plusTxt.setAttribute('text-anchor', 'middle');
+        plusTxt.setAttribute('font-size', '10');
+        plusTxt.setAttribute('fill', '#fff');
+        plusTxt.setAttribute('font-weight', 'bold');
+        plusTxt.textContent = '+';
+
+        pNode.appendChild(circle);
+        pNode.appendChild(plusTxt);
+        protonGroup.appendChild(pNode);
+      }
+    }
+
+    // Dynamic positioning of Inner Shielding Electrons
+    let lastS = -1;
+    function renderShieldingElectrons() {
+      if (lastS === shieldS) return;
+      lastS = shieldS;
+      shieldingElectronsContainer.innerHTML = '';
+
+      let numShielders = Math.round(shieldS);
+      if (numShielders === 0) return;
+
+      for (let i = 0; i < numShielders; i++) {
+        let angle = -45 + (i * (90 / Math.max(1, numShielders - 1)));
+        if (numShielders === 1) angle = 0;
+        let rad = angle * (Math.PI / 180);
+        
+        let sx = nucleusPos.x + 140 * Math.cos(rad);
+        let sy = nucleusPos.y + 140 * Math.sin(rad);
+
+        const shNode = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        shNode.setAttribute('transform', `translate(${sx}, ${sy})`);
+
+        // Shielder Body
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute('cx', '0');
+        circle.setAttribute('cy', '0');
+        circle.setAttribute('r', '15');
+        circle.setAttribute('fill', 'url(#innerElectronGrad)');
+        circle.setAttribute('stroke', '#0284c7');
+        circle.setAttribute('stroke-width', '1.5');
+        circle.classList.add('glow-blue');
+
+        // Dynamic Arms pulling the main rope
+        let ropeYAtX = nucleusPos.y;
+        let armPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        let dyRope = ropeYAtX - sy;
+        
+        armPath.setAttribute('d', `M -8 2 Q -12 ${dyRope/2} 5 ${dyRope} M 8 2 Q 12 ${dyRope/2} 5 ${dyRope}`);
+        armPath.setAttribute('fill', 'none');
+        armPath.setAttribute('stroke', '#38bdf8');
+        armPath.setAttribute('stroke-width', '2');
+        armPath.setAttribute('stroke-linecap', 'round');
+
+        // Cute face
+        const eyeLeft = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        eyeLeft.setAttribute('cx', '-4');
+        eyeLeft.setAttribute('cy', '-3');
+        eyeLeft.setAttribute('r', '2.5');
+        eyeLeft.setAttribute('fill', '#0c4a6e');
+
+        const eyeRight = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        eyeRight.setAttribute('cx', '4');
+        eyeRight.setAttribute('cy', '-3');
+        eyeRight.setAttribute('r', '2.5');
+        eyeRight.setAttribute('fill', '#0c4a6e');
+
+        const smile = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        smile.setAttribute('d', 'M -3 3 Q 0 6 3 3');
+        smile.setAttribute('fill', 'none');
+        smile.setAttribute('stroke', '#0c4a6e');
+        smile.setAttribute('stroke-width', '1.5');
+
+        const minus = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        minus.setAttribute('x', '0');
+        minus.setAttribute('y', '12');
+        minus.setAttribute('text-anchor', 'middle');
+        minus.setAttribute('font-size', '10');
+        minus.setAttribute('fill', '#fff');
+        minus.setAttribute('font-weight', 'bold');
+        minus.textContent = '-';
+
+        const labelText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        labelText.setAttribute('x', '0');
+        labelText.setAttribute('y', '-20');
+        labelText.setAttribute('text-anchor', 'middle');
+        labelText.setAttribute('font-size', '8');
+        labelText.setAttribute('fill', '#a855f7');
+        labelText.setAttribute('font-weight', 'bold');
+        labelText.textContent = 'Shield';
+
+        shNode.appendChild(armPath);
+        shNode.appendChild(circle);
+        shNode.appendChild(eyeLeft);
+        shNode.appendChild(eyeRight);
+        shNode.appendChild(smile);
+        shNode.appendChild(minus);
+        shNode.appendChild(labelText);
+
+        shieldingElectronsContainer.appendChild(shNode);
+      }
+    }
+
+    // Dynamic streaming attraction particles
+    function updateParticles(distance) {
+      particleContainer.innerHTML = '';
+      
+      for (let i = particles.length - 1; i >= 0; i--) {
+        let p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life -= 0.015;
+
+        let pdx = p.x - nucleusPos.x;
+        let pdy = p.y - nucleusPos.y;
+        let distFromCore = Math.sqrt(pdx*pdx + pdy*pdy);
+
+        if (showShieldClouds && distFromCore > 130 && distFromCore < 155 && Math.random() < 0.25) {
+          p.vx = -p.vx * 0.5 + (Math.random() - 0.5) * 4;
+          p.vy = (Math.random() - 0.5) * 8;
+          p.life *= 0.6;
+        }
+
+        if (p.life <= 0) {
+          particles.splice(i, 1);
+          continue;
+        }
+
+        const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        c.setAttribute('cx', p.x);
+        c.setAttribute('cy', p.y);
+        c.setAttribute('r', 3 * p.life);
+        c.setAttribute('fill', '#ffd700');
+        c.setAttribute('opacity', p.life);
+        c.setAttribute('filter', 'drop-shadow(0 0 3px #fbbf24)');
+        particleContainer.appendChild(c);
+      }
+    }
+
+    // Concentric Repulsion Rings
+    function updateRepulsionWaves() {
+      repulsionWavesGroup.innerHTML = '';
+      
+      let numShielders = Math.round(shieldS);
+      if (numShielders === 0 || !showRepulsionWaves) return;
+
+      if (repulsionActive) {
+        repulsionRippleRadius = (repulsionRippleRadius + 2.5) % 45;
+        
+        for (let i = 0; i < numShielders; i++) {
+          let angle = -45 + (i * (90 / Math.max(1, numShielders - 1)));
+          if (numShielders === 1) angle = 0;
+          let rad = angle * (Math.PI / 180);
+          let sx = nucleusPos.x + 140 * Math.cos(rad);
+          let sy = nucleusPos.y + 140 * Math.sin(rad);
+
+          const rip = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+          rip.setAttribute('cx', sx);
+          rip.setAttribute('cy', sy);
+          rip.setAttribute('r', 15 + repulsionRippleRadius);
+          rip.setAttribute('fill', 'none');
+          rip.setAttribute('stroke', '#22d3ee');
+          rip.setAttribute('stroke-width', '1.5');
+          rip.setAttribute('opacity', (45 - repulsionRippleRadius) / 45);
+          repulsionWavesGroup.appendChild(rip);
+        }
+      }
+    }
+
+    // Dynamic Force percentage tags and tension arrowheads
+    function drawVectors(controlX, controlY, zeff, att, rep) {
+      vectorsGroup.innerHTML = '';
+
+      const arrowAtt = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      let dirX = nucleusPos.x - elPos.x;
+      let dirY = nucleusPos.y - elPos.y;
+      let dLen = Math.sqrt(dirX*dirX + dirY*dirY);
+      let ux = dirX / dLen;
+      let pointerUy = dirY / dLen;
+
+      let startX = elPos.x + ux * 35;
+      let startY = elPos.y + pointerUy * 35;
+      let endX = startX + ux * 60;
+      let endY = startY + pointerUy * 60;
+      
+      arrowAtt.setAttribute('d', `M ${startX} ${startY} L ${endX} ${endY} M ${startX} ${startY} L ${startX + (ux + pointerUy*0.5)*12} ${startY + (pointerUy - ux*0.5)*12} M ${startX} ${startY} L ${startX + (ux - pointerUy*0.5)*12} ${startY + (pointerUy + ux*0.5)*12}`);
+      arrowAtt.setAttribute('fill', 'none');
+      arrowAtt.setAttribute('stroke', '#ffd700');
+      arrowAtt.setAttribute('stroke-width', '3');
+      arrowAtt.setAttribute('filter', 'drop-shadow(0 0 4px #fbbf24)');
+      vectorsGroup.appendChild(arrowAtt);
+
+      const percentTag = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      percentTag.setAttribute('transform', `translate(${controlX}, ${controlY - 20})`);
+      
+      const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+      rect.setAttribute('x', '-65');
+      rect.setAttribute('y', '-12');
+      rect.setAttribute('width', '130');
+      rect.setAttribute('height', '24');
+      rect.setAttribute('rx', '6');
+      rect.setAttribute('fill', 'rgba(15, 23, 42, 0.9)');
+      rect.setAttribute('stroke', 'rgba(253, 224, 71, 0.3)');
+      rect.setAttribute('stroke-width', '1');
+
+      const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      txt.setAttribute('x', '0');
+      txt.setAttribute('y', '4');
+      txt.setAttribute('text-anchor', 'middle');
+      txt.setAttribute('font-size', '10');
+      txt.setAttribute('fill', '#fef08a');
+      txt.setAttribute('font-weight', 'bold');
+      txt.setAttribute('class', 'font-header');
+      
+      let remainingPercent = Math.max(10, Math.round((zeff / actualZ) * 100));
+      txt.textContent = `Zeff Pull: ${remainingPercent}% Left`;
+
+      percentTag.appendChild(rect);
+      percentTag.appendChild(txt);
+      vectorsGroup.appendChild(percentTag);
+
+      if (shieldS > 0 && showRepulsionWaves) {
+        const arrowRep = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        let repStartX = elPos.x - ux * 35;
+        let repStartY = elPos.y - pointerUy * 35;
+        let repEndX = repStartX - ux * 45;
+        let repEndY = repStartY - pointerUy * 45;
+        
+        arrowRep.setAttribute('d', `M ${repStartX} ${repStartY} L ${repEndX} ${repEndY} M ${repStartX} ${repStartY} L ${repStartX - (ux - pointerUy*0.5)*10} ${repStartY - (pointerUy + ux*0.5)*10} M ${repStartX} ${repStartY} L ${repStartX - (ux + pointerUy*0.5)*10} ${repStartY - (pointerUy - ux*0.5)*10}`);
+        arrowRep.setAttribute('fill', 'none');
+        arrowRep.setAttribute('stroke', '#06b6d4');
+        arrowRep.setAttribute('stroke-width', '2.5');
+        arrowRep.setAttribute('filter', 'drop-shadow(0 0 3px #06b6d4)');
+        vectorsGroup.appendChild(arrowRep);
+      }
+    }
+
+    // Drag Interaction Event Handlers (Mouse & Touch-friendly viewport support)
+    function onStartDrag(e) {
+      e.preventDefault();
+      isDragging = true;
+      playSound('sine', 440, 0.1);
+    }
+
+    // Coordinates mapping helper
+    function onDrag(e) {
+      if (!isDragging) return;
+      
+      const rect = svgVisualizer.getBoundingClientRect();
+      let clientX = e.clientX || (e.touches && e.touches[0].clientX);
+      let clientY = e.clientY || (e.touches && e.touches[0].clientY);
+
+      if (!clientX || !clientY) return;
+
+      let relativeX = clientX - rect.left;
+      let relativeY = clientY - rect.top;
+
+      if (relativeX < 190) relativeX = 190;
+      if (relativeX > 750) relativeX = 750;
+      if (relativeY < 80) relativeY = 80;
+      if (relativeY > 480) relativeY = 480;
+
+      elPos.x = relativeX;
+      elPos.y = relativeY;
+    }
+
+    function onEndDrag() {
+      if (isDragging) {
+        isDragging = false;
+        playSound('sine', 520, 0.15);
+      }
+    }
+
+    // Bind interaction events
+    outerElectronGroup.addEventListener('mousedown', onStartDrag);
+    outerElectronGroup.addEventListener('touchstart', onStartDrag, { passive: false });
+    
+    window.addEventListener('mousemove', onDrag);
+    window.addEventListener('touchmove', onDrag, { passive: false });
+    
+    window.addEventListener('mouseup', onEndDrag);
+    window.addEventListener('touchend', onEndDrag);
+
+    // Dynamic state controllers for Scene Manager
+    function switchScene(num) {
+      if (num < 1 || num > 10) return;
+      currentScene = num;
+
+      // Sound notification
+      playSound('sine', 300 + num * 50, 0.18, 0.12);
+
+      // Highlight active button
+      document.querySelectorAll('.scene-btn').forEach(btn => {
+        btn.classList.remove('bg-yellow-500/10', 'border-yellow-500', 'text-yellow-300');
+        btn.classList.add('bg-indigo-950/30', 'border-white/5', 'text-slate-400');
+      });
+      const activeBtn = document.getElementById(`btn-scene-${num}`);
+      if (activeBtn) {
+        activeBtn.classList.remove('bg-indigo-950/30', 'border-white/5', 'text-slate-400');
+        activeBtn.classList.add('bg-yellow-500/10', 'border-yellow-500', 'text-yellow-300');
+      }
+
+      // Update text progress
+      document.getElementById('sceneProgress').innerText = num === 10 ? "Sandbox Mode" : `Scene ${num} of 9`;
+
+      // Set pedagogical state
+      const state = scenes[num];
+      document.getElementById('conceptTitle').innerText = `${num === 10 ? "🧪" : num + "."} ${state.title}`;
+      document.getElementById('conceptDesc').innerHTML = state.desc;
+      document.getElementById('taskText').innerText = state.task;
+
+      // Sync state variables
+      actualZ = state.z;
+      shieldS = state.s;
+      showShieldClouds = state.showCloud;
+      showRepulsionWaves = state.showWaves;
+
+      // Set custom overlays
+      if (num === 4 || state.showCloud) {
+        shieldCloud.classList.add('opacity-100');
+        shieldCloud.classList.remove('opacity-0');
+      } else {
+        shieldCloud.classList.add('opacity-0');
+        shieldCloud.classList.remove('opacity-100');
+      }
+
+      // Toggle Sandbox view
+      if (num === 10) {
+        sandboxControlsOverlay.classList.remove('opacity-0', 'pointer-events-none');
+        sandboxControlsOverlay.classList.add('opacity-100');
+        // sync sliders
+        sliderZ.value = actualZ;
+        sliderS.value = shieldS;
+        sliderZVal.innerText = actualZ;
+        sliderSVal.innerText = shieldS;
+      } else {
+        sandboxControlsOverlay.classList.add('opacity-0', 'pointer-events-none');
+        sandboxControlsOverlay.classList.remove('opacity-100');
+      }
+
+      // Toggle scene 9 Split layout view
+      if (num === 9) {
+        splitScreenOverlay.classList.remove('opacity-0');
+        splitScreenOverlay.classList.add('opacity-100');
+      } else {
+        splitScreenOverlay.classList.add('opacity-0');
+        splitScreenOverlay.classList.remove('opacity-100');
+      }
+
+      // Force-reset coordinates on transition
+      let equilibriumRadius = 380 - ((actualZ - shieldS) * 18);
+      elPos.x = nucleusPos.x + equilibriumRadius;
+      elPos.y = nucleusPos.y;
+    }
+
+    function prevScene() {
+      if (currentScene > 1) switchScene(currentScene - 1);
+    }
+
+    // Auto Advance Helper
+    function nextScene() {
+      if (currentScene < 10) switchScene(currentScene + 1);
+    }
+
+    function resetScene() {
+      switchScene(currentScene);
+    }
+
+    // Sandbox interactions
+    sliderZ.addEventListener('input', (e) => {
+      actualZ = parseInt(e.target.value);
+      sliderZVal.innerText = actualZ;
+      playSound('sine', 400 + actualZ * 20, 0.05, 0.08);
+    });
+
+    sliderS.addEventListener('input', (e) => {
+      shieldS = parseFloat(e.target.value);
+      sliderSVal.innerText = shieldS.toFixed(1);
+      playSound('sine', 500 - shieldS * 20, 0.05, 0.08);
+    });
+
+    document.getElementById('toggleShieldCloud').addEventListener('click', () => {
+      showShieldClouds = !showShieldClouds;
+      if (showShieldClouds) {
+        shieldCloud.classList.add('opacity-100');
+        shieldCloud.classList.remove('opacity-0');
+      } else {
+        shieldCloud.classList.add('opacity-0');
+        shieldCloud.classList.remove('opacity-100');
+      }
+      playSound('triangle', 330, 0.1);
+    });
+
+    document.getElementById('toggleRepulsion').addEventListener('click', () => {
+      showRepulsionWaves = !showRepulsionWaves;
+      playSound('triangle', 440, 0.1);
+    });
+
+    // Boot up
+    window.onload = function () {
+      switchScene(1);
+      updatePhysics();
+    };
+  </script>
+</body>
+</html>
