@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Interactive Chemistry Simulations | JEE &amp; NEET Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #070913;
+      --card: rgba(17, 24, 39, 0.78);
+      --card-hover: rgba(24, 34, 56, 0.92);
+      --border: rgba(255, 255, 255, 0.09);
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent-blue: #38bdf8;
+      --accent-purple: #a855f7;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-pink: #ec4899;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg);
+      background-image:
+        radial-gradient(at 10% 0%, rgba(56, 189, 248, 0.12) 0, transparent 45%),
+        radial-gradient(at 90% 10%, rgba(168, 85, 247, 0.12) 0, transparent 45%),
+        radial-gradient(at 50% 100%, rgba(16, 185, 129, 0.08) 0, transparent 50%);
+      background-attachment: fixed;
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border);
+      background: rgba(7, 9, 19, 0.8);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .container {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 1.25rem;
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 0;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(168, 85, 247, 0.25));
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
+    }
+
+    .brand h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(to right, #f8fafc, #7dd3fc, #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand p {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .badge-pill {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.1);
+      color: var(--accent-blue);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+    }
+
+    main {
+      flex: 1;
+      padding: 2.5rem 0 3.5rem;
+    }
+
+    .hero {
+      text-align: center;
+      max-width: 720px;
+      margin: 0 auto 2.25rem;
+    }
+
+    .hero h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.65rem;
+    }
+
+    .hero p {
+      color: var(--muted);
+      font-size: 0.98rem;
+    }
+
+    .filter-bar {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+    }
+
+    .filter-btn {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 0.45rem 1rem;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .filter-btn:hover {
+      color: var(--text);
+      border-color: rgba(56, 189, 248, 0.4);
+    }
+
+    .filter-btn.active {
+      background: linear-gradient(135deg, #0284c7, #6366f1);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 4px 16px rgba(56, 189, 248, 0.25);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.35rem;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.22s ease, border-color 0.22s ease, background 0.22s ease, box-shadow 0.22s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      background: var(--card-hover);
+      border-color: rgba(56, 189, 248, 0.45);
+      box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45), 0 0 24px rgba(56, 189, 248, 0.12);
+    }
+
+    .card.hidden {
+      display: none;
+    }
+
+    .card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .icon-box {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      flex-shrink: 0;
+    }
+
+    .tag {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.28rem 0.65rem;
+      border-radius: 999px;
+    }
+
+    .card h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: #f8fafc;
+    }
+
+    .card p {
+      font-size: 0.875rem;
+      color: var(--muted);
+      margin-bottom: 1.35rem;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0.9rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--accent-blue);
+    }
+
+    .card:hover .arrow {
+      transform: translateX(4px);
+    }
+
+    .arrow {
+      transition: transform 0.2s ease;
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 1.25rem 0;
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container nav-inner">
+      <div class="brand">
+        <div class="logo">⚛️</div>
+        <div>
+          <h1>Chemistry Interactive Lab</h1>
+          <p>Visual Simulations &amp; Concept Explorers</p>
+        </div>
+      </div>
+      <span class="badge-pill">Class 11 &amp; 12 &bull; JEE / NEET</span>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <h2>Explore Interactive Chemistry Simulations</h2>
+      <p>Select any module below to launch the interactive simulation, 3D studio, or visual lesson directly in your browser.</p>
+    </section>
+
+    <div class="filter-bar" role="group" aria-label="Filter simulations">
+      <button class="filter-btn active" data-filter="all">All Modules (6)</button>
+      <button class="filter-btn" data-filter="class11">Class 11 &bull; Structure &amp; Bonding</button>
+      <button class="filter-btn" data-filter="periodicity">Periodic Classification</button>
+      <button class="filter-btn" data-filter="class12">Class 12 &bull; Organic</button>
+    </div>
+
+    <section class="grid" id="cardsGrid">
+      <!-- 1. Effective Nuclear Charge -->
+      <a href="effective_nuclear_charge_zeff.html" class="card" data-category="class11 periodicity">
+        <div>
+          <div class="card-top">
+            <div class="icon-box" style="background: rgba(250, 204, 21, 0.14); border: 1px solid rgba(250, 204, 21, 0.3);">🧲</div>
+            <span class="tag" style="background: rgba(250, 204, 21, 0.12); color: #fde047;">Atomic &amp; Periodicity</span>
+          </div>
+          <h3>Effective Nuclear Charge (Z<sub>eff</sub>) &amp; Shielding</h3>
+          <p>Interactive tug-of-war laboratory with 9 guided scenes, Slater's rule equation board, repulsion waves, and a live physics sandbox.</p>
+        </div>
+        <div class="card-footer">
+          <span>Launch Simulation</span>
+          <span class="arrow">&rarr;</span>
+        </div>
+      </a>
+
+      <!-- 2. VSEPR Theory -->
+      <a href="vsepr_theory_interactive_studio.html" class="card" data-category="class11">
+        <div>
+          <div class="card-top">
+            <div class="icon-box" style="background: rgba(56, 189, 248, 0.14); border: 1px solid rgba(56, 189, 248, 0.3);">🧊</div>
+            <span class="tag" style="background: rgba(56, 189, 248, 0.12); color: #7dd3fc;">Class 11 &bull; 3D Studio</span>
+          </div>
+          <h3>VSEPR Theory Interactive Studio</h3>
+          <p>3D molecular geometry explorer covering shapes with and without lone pairs, bond angles, orbital lobes, and distortion factors.</p>
+        </div>
+        <div class="card-footer">
+          <span>Launch 3D Studio</span>
+          <span class="arrow">&rarr;</span>
+        </div>
+      </a>
+
+      <!-- 3. Lothar Meyer -->
+      <a href="Lothar_Meyer_Simulation.html" class="card" data-category="class11 periodicity">
+        <div>
+          <div class="card-top">
+            <div class="icon-box" style="background: rgba(16, 185, 129, 0.14); border: 1px solid rgba(16, 185, 129, 0.3);">📈</div>
+            <span class="tag" style="background: rgba(16, 185, 129, 0.12); color: #6ee7b7;">Periodic History</span>
+          </div>
+          <h3>Lothar Meyer's Atomic Volume Curve (1869)</h3>
+          <p>Animated graph of atomic volume vs. atomic weight with interactive group filters for alkali peaks, halogens, and transition valleys.</p>
+        </div>
+        <div class="card-footer">
+          <span>Open Graph</span>
+          <span class="arrow">&rarr;</span>
+        </div>
+      </a>
+
+      <!-- 4. Mendeleev 1905 Table -->
+      <a href="Mendeleev_1905_Table.html" class="card" data-category="class11 periodicity">
+        <div>
+          <div class="card-top">
+            <div class="icon-box" style="background: rgba(168, 85, 247, 0.14); border: 1px solid rgba(168, 85, 247, 0.3);">🧪</div>
+            <span class="tag" style="background: rgba(168, 85, 247, 0.12); color: #d8b4fe;">Periodic Table</span>
+          </div>
+          <h3>Mendeleev's Periodic Table (1905)</h3>
+          <p>Interactive 1905 table featuring crosshair row/column inspection and highlights for the Te/I inversion and predictive element gaps.</p>
+        </div>
+        <div class="card-footer">
+          <span>Explore Table</span>
+          <span class="arrow">&rarr;</span>
+        </div>
+      </a>
+
+      <!-- 5. Mendeleev Predictions Table -->
+      <a href="Mendeleev_Predictions_Table.html" class="card" data-category="class11 periodicity">
+        <div>
+          <div class="card-top">
+            <div class="icon-box" style="background: rgba(245, 158, 11, 0.14); border: 1px solid rgba(245, 158, 11, 0.3);">✨</div>
+            <span class="tag" style="background: rgba(245, 158, 11, 0.12); color: #fcd34d;">Table 3.3 Reveal</span>
+          </div>
+          <h3>Mendeleev's Predictions vs. Reality</h3>
+          <p>Compare Mendeleev's predicted properties for Eka-aluminium and Eka-silicon against the discovered elements Gallium and Germanium.</p>
+        </div>
+        <div class="card-footer">
+          <span>Compare Data</span>
+          <span class="arrow">&rarr;</span>
+        </div>
+      </a>
+
+      <!-- 6. SN1 & SN2 -->
+      <a href="simulation%20SN1%20&%20SN2.html" class="card" data-category="class12">
+        <div>
+          <div class="card-top">
+            <div class="icon-box" style="background: rgba(236, 72, 153, 0.14); border: 1px solid rgba(236, 72, 153, 0.3);">🧬</div>
+            <span class="tag" style="background: rgba(236, 72, 153, 0.12); color: #f9a8d4;">Class 12 &bull; Organic</span>
+          </div>
+          <h3>Nucleophilic Substitution (S<sub>N</sub>1 &amp; S<sub>N</sub>2)</h3>
+          <p>Interactive deck with reaction swap simulation, pathway branching, 10-point comparison matrix, and flip-card mnemonics.</p>
+        </div>
+        <div class="card-footer">
+          <span>Open Presentation</span>
+          <span class="arrow">&rarr;</span>
+        </div>
+      </a>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      Hosted on GitHub Pages &bull; Interactive Chemistry Simulations
+    </div>
+  </footer>
+
+  <script>
+    const buttons = document.querySelectorAll('.filter-btn');
+    const cards = document.querySelectorAll('.card');
+
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        buttons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const filter = btn.dataset.filter;
+        cards.forEach(card => {
+          const categories = card.dataset.category.split(' ');
+          if (filter === 'all' || categories.includes(filter)) {
+            card.classList.remove('hidden');
+          } else {
+            card.classList.add('hidden');
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
